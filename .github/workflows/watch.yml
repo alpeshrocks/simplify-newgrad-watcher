@@ -1,0 +1,73 @@
+name: Watch New-Grad-Positions
+
+on:
+  schedule:
+    # Every 5 minutes. GitHub's shared scheduler can add delay under load,
+    # so real-world latency is roughly 5-15 minutes.
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      send_test_email:
+        description: "Send a test email instead of checking for new roles"
+        type: boolean
+        default: false
+      reset_state:
+        description: "Wipe state.json and re-seed from the current README"
+        type: boolean
+        default: false
+
+concurrency:
+  group: watcher
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Reset state
+        if: inputs.reset_state
+        run: rm -f state.json
+
+      - name: Check for new roles
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_FROM: ${{ secrets.SMTP_USER }}
+          EMAIL_TO: ${{ vars.EMAIL_TO }}
+          SEND_TEST_EMAIL: ${{ inputs.send_test_email }}
+        run: python watcher.py
+
+      - name: Commit state
+        if: ${{ !inputs.send_test_email }}
+        run: |
+          if [[ -z "$(git status --porcelain state.json)" ]]; then
+            echo "No state change."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          git commit -m "state: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && \
+              git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            echo "push attempt $i failed, retrying..."
+            sleep 5
+          done
+          exit 1
