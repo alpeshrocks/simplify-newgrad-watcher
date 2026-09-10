@@ -1,18 +1,28 @@
 name: Watch New-Grad-Positions
 
+# GitHub's scheduler is unreliable at short intervals -- firings get delayed or
+# skipped entirely. So we don't rely on cron for polling frequency: each run
+# stays alive and polls internally every POLL_SECONDS. Cron only has to land
+# occasionally to keep the chain going.
+#
+# concurrency + cancel-in-progress:false means at most one run is active and one
+# is queued, so the moment a run ends the queued one starts. Continuous cover.
+
 on:
   schedule:
-    # Every 5 minutes. GitHub's shared scheduler can add delay under load,
-    # so real-world latency is roughly 5-15 minutes.
-    - cron: "*/5 * * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch:
     inputs:
       send_test_email:
-        description: "Send a test email instead of checking for new roles"
+        description: "Send a test email and exit"
         type: boolean
         default: false
       reset_state:
         description: "Wipe state.json and re-seed from the current README"
+        type: boolean
+        default: false
+      once:
+        description: "Check once and exit instead of looping"
         type: boolean
         default: false
 
@@ -23,10 +33,14 @@ concurrency:
 permissions:
   contents: write
 
+env:
+  POLL_SECONDS: 60
+  LOOP_MINUTES: 50
+
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +55,20 @@ jobs:
         if: inputs.reset_state
         run: rm -f state.json
 
-      - name: Check for new roles
+      - name: Send test email
+        if: inputs.send_test_email
+        env:
+          SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_FROM: ${{ secrets.SMTP_USER }}
+          EMAIL_TO: ${{ vars.EMAIL_TO }}
+          SEND_TEST_EMAIL: "true"
+        run: python watcher.py
+
+      - name: Poll for new roles
+        if: ${{ !inputs.send_test_email }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
@@ -50,24 +77,50 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           EMAIL_FROM: ${{ secrets.SMTP_USER }}
           EMAIL_TO: ${{ vars.EMAIL_TO }}
-          SEND_TEST_EMAIL: ${{ inputs.send_test_email }}
-        run: python watcher.py
-
-      - name: Commit state
-        if: ${{ !inputs.send_test_email }}
+          ONCE: ${{ inputs.once }}
         run: |
-          if [[ -z "$(git status --porcelain state.json)" ]]; then
-            echo "No state change."
-            exit 0
-          fi
+          set -uo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add state.json
-          git commit -m "state: $(date -u '+%Y-%m-%d %H:%M UTC')"
-          for i in 1 2 3; do
-            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && \
-              git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
-            echo "push attempt $i failed, retrying..."
-            sleep 5
+
+          DEADLINE=$(( SECONDS + LOOP_MINUTES * 60 ))
+          FAILS=0
+          ITER=0
+
+          while :; do
+            ITER=$(( ITER + 1 ))
+            echo "::group::check #$ITER  ($(date -u '+%H:%M:%S') UTC)"
+
+            if python watcher.py; then
+              FAILS=0
+            else
+              FAILS=$(( FAILS + 1 ))
+              echo "check failed ($FAILS in a row)"
+              # Transient network/API blips are normal; only give up if it's
+              # persistent, so the run shows red and we notice.
+              if [ "$FAILS" -ge 10 ]; then
+                echo "::error::10 consecutive failures, aborting run"
+                echo "::endgroup::"
+                exit 1
+              fi
+            fi
+
+            # Persist state as soon as it changes, so nothing is lost if the
+            # runner is reclaimed mid-loop.
+            if [ -n "$(git status --porcelain state.json)" ]; then
+              git add state.json
+              git commit -q -m "state: $(date -u '+%Y-%m-%d %H:%M UTC')"
+              for i in 1 2 3; do
+                git pull -q --rebase --autostash origin "${GITHUB_REF_NAME}" \
+                  && git push -q origin "HEAD:${GITHUB_REF_NAME}" && break
+                echo "push retry $i"
+                sleep $(( i * 5 ))
+              done
+            fi
+
+            echo "::endgroup::"
+
+            [ "${ONCE:-false}" = "true" ] && { echo "once mode, done"; break; }
+            [ "$SECONDS" -ge "$DEADLINE" ] && { echo "loop window elapsed"; break; }
+            sleep "$POLL_SECONDS"
           done
-          exit 1
