@@ -14,6 +14,12 @@ line(){ printf '\n\033[1m%s\033[0m\n' "$*"; }
 
 line "1. Signed in as: ${OWNER:-NOT SIGNED IN}"
 
+line "1b. Pushing the improved watcher (better error messages)"
+rm -f .git/*.lock .git/objects/*.lock .git/objects/*/tmp_obj_* 2>/dev/null || true
+git add -A
+git -c commit.gpgsign=false commit -q -m "wip" 2>/dev/null || true
+git push origin main 2>&1 | tail -3 | sed 's/^/   /'
+
 line "2. What GitHub actually has stored"
 echo "   -- secrets --"
 "$GH" secret list   --repo "$SLUG" 2>&1 | sed 's/^/   /'
