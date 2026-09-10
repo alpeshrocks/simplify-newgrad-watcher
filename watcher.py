@@ -303,10 +303,16 @@ def send_email(subject, plain, body_html):
     sender = os.getenv("EMAIL_FROM") or user
     to = os.getenv("EMAIL_TO")
 
-    if not all([user, pwd, to]):
-        print("  ! SMTP not configured (need SMTP_USER, SMTP_PASS, EMAIL_TO)")
+    missing = [n for n, v in (("SMTP_USER", user), ("SMTP_PASS", pwd),
+                              ("EMAIL_TO", to)) if not v]
+    if missing:
+        print("  ! NOT CONFIGURED — these are empty: " + ", ".join(missing))
+        print("    SMTP_USER/SMTP_PASS are repo *secrets*; EMAIL_TO is a repo *variable*.")
+        print("    Settings -> Secrets and variables -> Actions")
         print(f"  [dry run] would send: {subject}")
         return False
+
+    print(f"  connecting to {host}:{port} as {user} -> {to}")
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -315,10 +321,27 @@ def send_email(subject, plain, body_html):
     msg.attach(MIMEText(plain, "plain", "utf-8"))
     msg.attach(MIMEText(body_html, "html", "utf-8"))
 
-    with smtplib.SMTP(host, port, timeout=30) as server:
-        server.starttls()
-        server.login(user, pwd)
-        server.sendmail(sender, [t.strip() for t in to.split(",")], msg.as_string())
+    try:
+        with smtplib.SMTP(host, port, timeout=30) as server:
+            server.starttls()
+            server.login(user, pwd)
+            server.sendmail(sender, [t.strip() for t in to.split(",")],
+                            msg.as_string())
+    except smtplib.SMTPAuthenticationError as exc:
+        print("  ! GMAIL REJECTED THE LOGIN.")
+        print(f"    {exc.smtp_code} {exc.smtp_error!r}")
+        print("    Almost always one of:")
+        print("      - SMTP_PASS is your normal Google password, not an APP PASSWORD")
+        print("      - 2-Step Verification is off (app passwords need it on)")
+        print("      - the app password was revoked, or belongs to a different account")
+        print("    Make a fresh one: https://myaccount.google.com/apppasswords")
+        return False
+    except smtplib.SMTPRecipientsRefused as exc:
+        print(f"  ! recipient refused: {exc.recipients}")
+        return False
+    except Exception as exc:
+        print(f"  ! SMTP failed: {type(exc).__name__}: {exc}")
+        return False
     print(f"  ✓ emailed {to}: {subject}")
     return True
 
