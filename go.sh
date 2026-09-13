@@ -17,7 +17,7 @@ git fetch -q origin main
 git checkout -q origin/main -- state.json 2>/dev/null || true
 
 git add -A
-git -c commit.gpgsign=false commit -q -m "Watch speedyapply/2027-SWE-College-Jobs NEW_GRAD_USA.md alongside SimplifyJobs" 2>/dev/null || echo "  (no code changes to commit)"
+git -c commit.gpgsign=false commit -q -m "Cover the whole cron gap: 5.5h poll loop instead of 50m" 2>/dev/null || echo "  (no code changes to commit)"
 
 git pull -q --rebase --autostash origin main || { echo "rebase onto origin failed"; exit 1; }
 git push origin main || exit 1
@@ -38,6 +38,6 @@ echo "Starting a fresh run with both sources..."
 sleep 35
 "$GH" run list --repo "$SLUG" --limit 3
 echo
-echo "The first check seeds speedyapply's ~688 roles (no email - that's correct)."
+echo "Each run now polls every 60s for 5.5 hours, so cron gaps no longer leave holes."
 echo "SimplifyJobs keeps its existing state, so it keeps alerting as normal."
 echo "Live: https://github.com/$SLUG/actions"

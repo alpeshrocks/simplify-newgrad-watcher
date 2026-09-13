@@ -35,12 +35,12 @@ permissions:
 
 env:
   POLL_SECONDS: 60
-  LOOP_MINUTES: 50
+  LOOP_MINUTES: 330
 
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
 
