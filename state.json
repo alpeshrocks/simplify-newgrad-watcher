@@ -3,7 +3,7 @@
  "sources": {
   "simplify": {
    "seeded": true,
-   "updated": "2026-10-13T22:32:51+00:00",
+   "updated": "2026-10-13T23:32:19+00:00",
    "count": 2117,
    "ids": [
     "sj:00620949-7bbd-4342-a515-87e57990c860",
@@ -545,7 +545,6 @@
     "sj:fbb35820-5f6d-46ad-b912-0db35c744da1",
     "sj:fd2239be-54e7-4647-96fb-ab88ab37e8e1",
     "sj:fdb7c5e9-3d58-4332-bb5d-4b3446253fd0",
-    "sj:fe444a2e-411b-4a40-b6f4-9098bbd980bb",
     "sj:fef271f0-0395-41e1-bc64-b0f2f454e58f",
     "sj:ff18e564-ff73-44fc-ab72-2096b2a49076",
     "sj:ff669f83-a6e2-46a9-90ca-5d3dfbad37ae",
@@ -830,6 +829,7 @@
     "txt:2b67c8d3aeff9b94",
     "txt:2bc6c06db58fc751",
     "txt:2bd592819484090c",
+    "txt:2bfe80a96fd4f093",
     "txt:2c3533da05f5921d",
     "txt:2c3b38e2d381aeb5",
     "txt:2c62b3cfe7d2ad4b",
