@@ -3,8 +3,8 @@
  "sources": {
   "simplify": {
    "seeded": true,
-   "updated": "2026-10-17T05:33:00+00:00",
-   "count": 2137,
+   "updated": "2026-10-17T07:32:27+00:00",
+   "count": 2135,
    "ids": [
     "sj:00620949-7bbd-4342-a515-87e57990c860",
     "sj:00c861f1-fd31-484a-b291-99b763f24e3c",
@@ -770,7 +770,6 @@
     "txt:22d880d125a45737",
     "txt:233d03018af3b031",
     "txt:238856a20d233f23",
-    "txt:23bde9937a00390e",
     "txt:24304b5e9c4d9d03",
     "txt:24376857b98c052e",
     "txt:2438fe1993c7031b",
@@ -1317,7 +1316,6 @@
     "txt:7af885fc33f59139",
     "txt:7b201436b7d97e94",
     "txt:7b3840331d4168d4",
-    "txt:7b56d29a0a059e7c",
     "txt:7b672d0536a1b8e4",
     "txt:7b69bbacf398ea3b",
     "txt:7c1d5a5dc0cc25c3",
