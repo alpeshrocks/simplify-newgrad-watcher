@@ -3,8 +3,8 @@
  "sources": {
   "simplify": {
    "seeded": true,
-   "updated": "2026-10-24T05:02:33+00:00",
-   "count": 2154,
+   "updated": "2026-10-24T05:32:03+00:00",
+   "count": 2152,
    "ids": [
     "sj:00620949-7bbd-4342-a515-87e57990c860",
     "sj:00c861f1-fd31-484a-b291-99b763f24e3c",
@@ -212,7 +212,6 @@
     "sj:5ca6ffaa-b127-49e1-b986-4aaa08139fb3",
     "sj:5d7ae207-e8c4-4562-9e0d-5df316223461",
     "sj:5d914152-b9b5-4947-beba-e7d6c0cced5e",
-    "sj:5db5ee71-523e-4e86-99ec-09801720c4ec",
     "sj:5ee9e9d5-ea2a-4631-8387-e43aec1496e1",
     "sj:5f473e5a-c08d-4e76-ae09-29c68b392aea",
     "sj:60bf5735-7aca-4f7f-a89d-fec901bb12bf",
@@ -251,7 +250,6 @@
     "sj:74c5b938-b6a5-4b8b-897c-83c285a86481",
     "sj:75042e8a-2126-4f9c-8363-aa0aa0fe281c",
     "sj:7553023b-466e-4a6c-a382-0087b6fe7877",
-    "sj:7586b180-2734-441d-bc21-7e1c2cfba24e",
     "sj:759ab78f-f452-4b8d-bc1b-7ced64609d10",
     "sj:7654bad4-ebff-466a-bd2d-63a5d167ba11",
     "sj:7656aad8-a423-4e16-bb7e-5b487532457f",
@@ -347,7 +345,6 @@
     "sj:9c338480-379d-4ca7-b5c9-3cb606516e95",
     "sj:9c569a74-622f-4862-8f43-84f0e63f9893",
     "sj:9c56cba3-9b43-4bdb-a6dc-9cf12b83e51d",
-    "sj:9c7fd5ef-e102-4131-9530-64b9f976d432",
     "sj:9c9ff27f-75fd-4c1b-b076-e687f7e08f74",
     "sj:9d9eb552-2b86-429d-875e-4c930c609200",
     "sj:9dfe7746-ba68-48c6-8d73-9a3e54ea661f",
@@ -997,6 +994,7 @@
     "txt:44aced1313cac5c9",
     "txt:44e2e53aa2ab19a2",
     "txt:44ec0eb82172ac73",
+    "txt:44f6b683f6a84bab",
     "txt:450a68f60abf8ee8",
     "txt:452beaebcb45cb58",
     "txt:45352c1c47b2720f",
