@@ -3,8 +3,8 @@
  "sources": {
   "simplify": {
    "seeded": true,
-   "updated": "2026-11-01T10:02:14+00:00",
-   "count": 2179,
+   "updated": "2026-11-01T15:32:42+00:00",
+   "count": 2178,
    "ids": [
     "sj:00620949-7bbd-4342-a515-87e57990c860",
     "sj:00bf55d7-0603-40f1-a5fb-4e1cfc96754a",
@@ -1109,7 +1109,6 @@
     "txt:524756c171f2c897",
     "txt:52cbf761962dabee",
     "txt:53923fda2e7e6439",
-    "txt:5393741785662b30",
     "txt:539cbec885f596b1",
     "txt:53e93edf4229d7fc",
     "txt:54046a2e65acb678",
